@@ -3,11 +3,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from scipy import signal
+from statsmodels.graphics.tsaplots import plot_acf
 
 """
 Fill the blank values with 0.00-- not using
 """
 def remove_high_fliers(frames_to_use,case_number):
+    if case_number == 1:
+        frames_to_use['data'] = frames_to_use['data'].where(frames_to_use['data'].between(9,11))
+    elif case_number == 2:
+        frames_to_use['data'] = frames_to_use['data'].where(frames_to_use['data'].between(6, 9))
     # print(frames_to_use)
     # frames_to_use.fillna(0.000)
     # frames_to_use.stack().apply(pd.to_numeric, errors='ignore').fillna(0).unstack()
@@ -24,10 +29,6 @@ def remove_high_fliers(frames_to_use,case_number):
     # #     print(i, j)
     # #     frames_to_use['date_time'].replace({i: i.replace('T', ' ')})
     # #     print(frames_to_use['date_time'][0])
-    if case_number == 1:
-        frames_to_use['data'] = frames_to_use['data'].where(frames_to_use['data'].between(9,11))
-    elif case_number == 2:
-        frames_to_use['data'] = frames_to_use['data'].where(frames_to_use['data'].between(6, 9))
     # frames_to_use['200-pwl'] = frames_to_use['200-pwl'].replace(np.nan, 0) #working
     # frames_to_use.to_csv(r'/home/ak/Documents/DataAnalysis/DataAnalysis/File_Name.csv', index = False)
 
@@ -49,33 +50,34 @@ def plot_row_data(data_sargent,data_nueces):
     fig, ax = plt.subplots()
     data_sargent.plot(x='date_time', y='data', ax = ax, color='blue', label='Sargent Data')
     data_nueces.plot(x='date_time', y='data', ax = ax, color='red', label='Nueces Data')
+    plt.suptitle("Raw Data Plot")
     plt.show()
 
-def box_plot(frames_to_use):
+def box_plot_fill_data(frames_to_use):
     # data_sargent["data"] = data_sargent["data"].rolling(window = 5).mean
     frames_to_use["data"] = frames_to_use["data"].interpolate()
-    # data_nueces["data"] = data_nueces["data"].rolling(window = 5).mean
-    # plot_row_data(data_sargent, data_nueces)
-
     frames_to_use['day'] = frames_to_use['date_time'].apply(lambda x: x.date())
     frames_to_use['year'] = frames_to_use['date_time'].apply(lambda x: x.year)
     frames_to_use['month'] = frames_to_use['date_time'].apply(lambda x: x.month)
     frames_to_use['time_of_day'] = frames_to_use['date_time'].apply(lambda x: x.time())
-
-
+    # data_nueces["data"] = data_nueces["data"].rolling(window = 5).mean
+    # plot_row_data(data_sargent, data_nueces)
     # fig, ax = plt.subplots()
     # frames_to_use.boxplot(by='year', column=['data'], grid=False)
     # data_nueces.plot(x='date_time', y='data', ax=ax, color='red', label='Nueces Data')
     # plt.show()
     # plt.show()
 
+def plot_box(frames,value,label_name):
+    frames.boxplot(by=value, column=['data'], grid=False)
+    plt.suptitle(label_name)
+    plt.show()
+
 def histogram_intersection(a, b):
     v = np.minimum(a, b).sum().round(decimals=1)
     return v
 
-"""
-Rubric 1: plot_row_data, plot generic data
-"""
+
 if __name__ == '__main__':
     data_sargent_url = 'https://tamucc-ir.tdl.org/bitstream/handle/1969.6/87793/Sargent_RawDataOnly.csv?sequence=1&isAllowed=y'
     data_nueces_url = 'https://tamucc-ir.tdl.org/bitstream/handle/1969.6/87766/NuecesBay_RawDataOnly.csv?sequence=2&isAllowed=y'
@@ -91,7 +93,7 @@ if __name__ == '__main__':
     # print(data_nueces)
     # data_sargent.replace(data_sargent[:, 0], i[:, 0])
     """
-    Uncomment below code to open raw data
+    Uncomment below code to plot raw data
     """
     # plot_row_data(data_sargent, data_nueces)
     """
@@ -99,17 +101,34 @@ if __name__ == '__main__':
         1. Remove outliners
         2. Find the mean of given time and place it
     """
+    remove_high_fliers(data_sargent, 1)
+    remove_high_fliers(data_nueces, 2)
+    """
+    Uncomment this code to obtain boxplots
+    """
+    box_plot_fill_data(data_sargent)
+    box_plot_fill_data(data_nueces)
+    """
+    Below code to perform box plot
+    """
+    # plot_box(data_sargent,'month', 'Data Sargent per month')
+    """
+    Below code is for auto correlation and partial correlation
+    """
+    # pd.plotting.autocorrelation_plot(data_sargent['data'])
     # print(data_nueces.loc[67]) #to access location
     # fillgaps(data_sargent)
     # fillgaps(data_nueces)
+
+
+
     # plot_row_data_sargent(data_sargent)
     # plot_row_data_sargent(data_nueces)
     # data_sargent.boxplot(by='#date+time', column=['200-pwl'], grid=False)
     # sns.boxenplot(x=data_sargent['#date+time'], y=data_sargent['200-pwl'])
     # plt.boxplot(x=data_sargent['200-pwl'])
     # plt.show()
-    remove_high_fliers(data_sargent, 1)
-    remove_high_fliers(data_nueces, 2)
+
 
     # data_sargent.drop(data_sargent[data_sargent.isnull().sum(axis=1)>5].index,axis=0,inplace=True)
     # d = np.where(data_sargent.isnull().sum(axis=1) >= 1)
@@ -119,7 +138,7 @@ if __name__ == '__main__':
 
 
     # # data_sargent["data"] = data_sargent["data"].rolling(window = 5).mean
-    # data_nueces["data"] = data_nueces["data"].interpolate()
+
     # # data_nueces["data"] = data_nueces["data"].rolling(window = 5).mean
     # # plot_row_data(data_sargent, data_nueces)
     #
@@ -129,15 +148,10 @@ if __name__ == '__main__':
     # data_sargent['time_of_day'] = data_sargent['date_time'].apply(lambda x: x.time())
     # # print(data_sargent)
     #
-    # data_sargent.boxplot(by='year', column=['data'], grid=False)
     # plt.show()
     # data_sargent.boxplot()
     # plt.show()
-    """
-    Uncomment this code to obtain boxplots
-    """
-    box_plot(data_sargent)
-    box_plot(data_nueces)
+
     # data_sargent.boxplot(by='year', column=['data'], grid=False)
     # data_sargent.boxplot(by='month', column=['data'], grid=False)
     # data_nueces.boxplot(by='year', column=['data'], grid=False)
@@ -148,7 +162,8 @@ if __name__ == '__main__':
     Auto and partial correlation
     """
     # print(data_nueces.corr())
-    # print(data_nueces.corrwith(data_sargent, method='pearson'))
+    # print(data_sargent)
+    # print(data_sargent.corrwith(data_sargent['data'], method='pearson'))
 
     """
     This is for periodogram
@@ -157,6 +172,9 @@ if __name__ == '__main__':
     # plt.semilogy(f, Pxx_den)
     # plt.show()
 
+    """
+    This is for graphs
+    """
     # data_7d_rol = data_sargent['data'].rolling(window=7, center=True).mean()
     # data_365d_rol = data_sargent['data'].rolling(window=365, center=True).mean()
     #
@@ -194,5 +212,7 @@ if __name__ == '__main__':
     # numpy_sargent = data_sargent.to_numpy()
     # numpy_nueces = data_nueces.to_numpy()
     # print(numpy_nueces[68])
-
+    # data_sargent.to_csv(r'/home/ak/Documents/DataAnalysis/DataAnalysis/File_Name.csv', index = False)
+    # plot_acf(data_sargent['data'])
+    # plt.show()
 

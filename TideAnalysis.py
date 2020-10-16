@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from scipy import signal
-from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 """
 Fill the blank values with 0.00-- not using
@@ -108,6 +109,11 @@ if __name__ == '__main__':
     """
     box_plot_fill_data(data_sargent)
     box_plot_fill_data(data_nueces)
+    data_sargent = data_sargent.dropna()
+    data_sargent = data_sargent.reset_index(drop = True)
+    data_nueces = data_nueces.dropna()
+    data_nueces = data_nueces.reset_index(drop = True)
+    # print(data_nueces)
     """
     Below code to perform box plot
     """
@@ -115,6 +121,26 @@ if __name__ == '__main__':
     """
     Below code is for auto correlation and partial correlation
     """
+    # plot_acf(data_nueces['data'])
+    # # plot_pacf(data_nueces['data'])
+    # plt.suptitle('Nueces Data')
+    # plt.show()
+    # print(data_nueces.corr())
+    # print(data_sargent.corr())
+
+    """
+    This is for periodogram
+    """
+    # f, Pxx_den = signal.periodogram(data_sargent['data'])
+    # plt.semilogy(f, Pxx_den)
+    # plt.suptitle('Sargent Data')
+    # plt.show()
+    """
+    This is for season
+    """
+    season_plt = seasonal_decompose(data_nueces['data'], model='additive', period=365)
+    season_plt.plot()
+    plt.show()
     # pd.plotting.autocorrelation_plot(data_sargent['data'])
     # print(data_nueces.loc[67]) #to access location
     # fillgaps(data_sargent)
@@ -164,13 +190,6 @@ if __name__ == '__main__':
     # print(data_nueces.corr())
     # print(data_sargent)
     # print(data_sargent.corrwith(data_sargent['data'], method='pearson'))
-
-    """
-    This is for periodogram
-    """
-    # f, Pxx_den = signal.periodogram(data_sargent['data'])
-    # plt.semilogy(f, Pxx_den)
-    # plt.show()
 
     """
     This is for graphs

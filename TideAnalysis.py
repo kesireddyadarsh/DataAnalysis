@@ -5,6 +5,7 @@ import seaborn as sns
 from scipy import signal
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
+import statsmodels.api as sm
 
 """
 Fill the blank values with 0.00-- not using
@@ -138,6 +139,12 @@ if __name__ == '__main__':
     """
     This is for season
     """
+    # print(data_sargent)
+    # data_sargent['date_time'] = pd.to_datetime(data_sargent['date_time'])
+    # data_sargent = data_sargent.set_index('date_time')
+    # season_plt = sm.tsa.seasonal_decompose(data_sargent, model='additive', period=365)
+    # season_plt.plot()
+    # plt.show()
     season_plt = seasonal_decompose(data_nueces['data'], model='additive', period=365)
     season_plt.plot()
     plt.show()

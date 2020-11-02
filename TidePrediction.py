@@ -6,6 +6,7 @@ from scipy import signal
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 import statsmodels.api as sm
+import tensorflow as tf
 
 """
 Fill the blank values with 0.00-- not using
@@ -15,6 +16,9 @@ def remove_high_fliers(frames_to_use,case_number):
         frames_to_use['data'] = frames_to_use['data'].where(frames_to_use['data'].between(9,11))
     elif case_number == 2:
         frames_to_use['tide'] = frames_to_use['tide'].where(frames_to_use['tide'].between(6, 9))
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
 
 if __name__ == '__main__':
     data_nueces_url = 'https://tamucc-ir.tdl.org/bitstream/handle/1969.6/87766/NuecesBay_RawDataOnly.csv?sequence=2&isAllowed=y'

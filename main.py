@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from scipy import signal
+from scipy.optimize import curve_fit
+from statsmodels.tsa.arima_model import ARIMA
+from sklearn.metrics import mean_squared_error
+
+
+
 
 
 """
@@ -21,6 +27,24 @@ def plot_initial_value(case_number,path_x,path_y,noise_path_x):
     plt.legend(loc='upper right',markerscale=0.75)
     plt.show()
 
+def arima_model():
+    history = [x for x in noise_path_x_training]
+    predictions = list()
+    for t in range(len(noise_path_x_test)):
+        model = ARIMA(history, order=(5, 1, 0))
+        model_fit = model.fit(disp=0)
+        output = model_fit.forecast()
+        yhat = output[0]
+        predictions.append(yhat)
+        obs = noise_path_x_test[t]
+        history.append(obs)
+        print('predicted=%f, expected=%f' % (yhat, obs))
+    error = mean_squared_error(noise_path_x_test, predictions)
+    print('Test MSE: %.3f' % error)
+    # plot
+    plt.plot(noise_path_x_test)
+    plt.plot(predictions, color='red')
+    plt.show()
 """
 Path coordinates are of size 7519
 Use 5000 data points for training
@@ -28,8 +52,11 @@ Reward 4500
 """
 if __name__ == '__main__':
     # print("This is working")
-    url = "/home/ak/Documents/DataAnalysis/Project/data.csv"
-    url_1 = "/home/ak/Documents/DataAnalysis/Project/data_1.csv"
+    #url = "/home/ak/Documents/DataAnalysis/Project/data.csv"
+    # url_1 = "/home/ak/Documents/DataAnalysis/Project/data_1.csv"
+
+    url = "/Users/adarshkesireddy/Downloads/DataAnalysis-main-2/data.csv"
+    url_1 = "/Users/adarshkesireddy/Downloads/DataAnalysis-main-2/data_1.csv"
 
     data_training = pd.read_csv(url)
     data_x_training = data_training.loc[:,'x']
@@ -51,9 +78,7 @@ if __name__ == '__main__':
 
     # noise = np.random.uniform(-1,1,len(path_x_training))
     noise = np.random.normal(size=(len(path_x_training)))
-    print(len(noise),noise)
-    plt.plot(noise)
-    plt.show()
+
     if len(noise) < len(path_x_training):
         noise_path_x_training = path_x_training.copy()
         noise_path_x_training[:len(noise)] += noise
@@ -71,7 +96,20 @@ if __name__ == '__main__':
     if len(noise_path_x_test) != len(path_y_test):
         path_y_test = np.delete(path_y_test,len(noise_path_x_test)-1)
 
+    arima_model()
+    # X = data_x_test.values
+    # size = int(len(X) * 0.66)
+    # train, test = X[0:size], X[size:len(X)]
+    # print(train,test)
+    # history = [x for x in train]
+    # print(history)
 
-    # plot_initial_value(1,path_x_training,path_y_training,noise_path_x_training)
-    plot_initial_value(1,path_x_test,path_y_test,noise_path_x_test)
+    # plt.plot(noise_path_x_training)
+    # plt.plot(path_x_training)
+    # plt.xlabel("Time Step")
+    # plt.ylabel("Frequency")
+    # plt.title("Noise vs Actual Data")
+    # plt.show()
+    # plot_initial_value(0,path_x_training,path_y_training,noise_path_x_training)
+    # plot_initial_value(1,path_x_test,path_y_test,noise_path_x_test)
 
